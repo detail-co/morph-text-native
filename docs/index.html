@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>morph-text-native</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #09090b;
+  --bg-raised: #111113;
+  --bg-card: #18181b;
+  --border: #27272a;
+  --border-hover: #3f3f46;
+  --text: #fafafa;
+  --text-2: #a1a1aa;
+  --text-3: #52525b;
+  --accent: #3b82f6;
+  --accent-soft: rgba(59, 130, 246, 0.1);
+  --accent-border: rgba(59, 130, 246, 0.25);
+  --green: #22c55e;
+  --green-soft: rgba(34, 197, 94, 0.1);
+  --sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --mono: 'JetBrains Mono', 'Menlo', 'Consolas', monospace;
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --radius: 12px;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+}
+
+::selection {
+  background: var(--accent);
+  color: white;
+}
+
+.page {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* ---- nav ---- */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  padding: 0;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  background: rgba(9, 9, 11, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+.nav-inner {
+  max-width: 680px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+nav .logo {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-2);
+  letter-spacing: -0.02em;
+}
+nav .logo span { color: var(--text); }
+nav .links { display: flex; gap: 20px; align-items: center; }
+nav .links a {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-3);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+nav .links a:hover { color: var(--text); }
+nav .gh-link {
+  display: flex;
+  align-items: center;
+  color: var(--text-3);
+  transition: color 0.15s;
+}
+nav .gh-link:hover { color: var(--text); }
+
+/* ---- hero ---- */
+.hero {
+  padding-top: 120px;
+  padding-bottom: 64px;
+}
+
+.hero-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-border);
+  padding: 6px 14px;
+  border-radius: 100px;
+  margin-bottom: 24px;
+}
+
+.hero h1 {
+  font-size: clamp(36px, 6vw, 52px);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.035em;
+  margin-bottom: 16px;
+  color: var(--text);
+}
+
+.hero-desc {
+  font-size: 17px;
+  font-weight: 400;
+  color: var(--text-2);
+  line-height: 1.7;
+  max-width: 520px;
+  margin-bottom: 32px;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.btn-primary {
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  background: var(--text);
+  color: var(--bg);
+  cursor: pointer;
+  transition: opacity 0.15s;
+  text-decoration: none;
+}
+.btn-primary:hover { opacity: 0.85; }
+
+.btn-secondary {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 400;
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.btn-secondary:hover {
+  border-color: var(--border-hover);
+  color: var(--text);
+}
+.btn-secondary .copy-icon {
+  opacity: 0.5;
+  transition: opacity 0.15s;
+}
+.btn-secondary:hover .copy-icon { opacity: 1; }
+
+.hero-meta {
+  display: flex;
+  gap: 16px;
+  margin-top: 24px;
+}
+.meta-item {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-3);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.meta-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+}
+
+/* ---- demo ---- */
+.demo {
+  padding: 64px 0;
+  border-top: 1px solid var(--border);
+}
+
+.section-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 20px;
+}
+
+.demo-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.demo-stage {
+  padding: 64px 32px;
+  min-height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ---- toast component ---- */
+.toast-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 24px;
+  border-radius: 100px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255,255,255,0.03) inset;
+  transition: width 400ms cubic-bezier(0.19, 1, 0.22, 1), height 400ms cubic-bezier(0.19, 1, 0.22, 1);
+  will-change: width, height;
+}
+
+.toast-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.toast-icon > div {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 18px;
+  height: 18px;
+  transition: opacity 0.2s ease;
+  opacity: 0;
+}
+.toast-icon > div svg {
+  width: 18px; height: 18px;
+  display: block;
+}
+
+.toast-icon[data-state="loading"] .icon-spinner { opacity: 1; }
+.toast-icon[data-state="success"] .icon-check { opacity: 1; }
+.toast-icon[data-state="error"] .icon-error { opacity: 1; }
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.icon-spinner svg {
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes check-draw {
+  to { stroke-dashoffset: 0; }
+}
+
+.toast-morph {
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  color: var(--text-2);
+  position: relative;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+
+.morph-char {
+  display: inline-block;
+  will-change: opacity, transform;
+  white-space: pre;
+}
+
+.demo-toolbar {
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  background: var(--bg-raised);
+}
+
+.chip {
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-3);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.chip:hover {
+  border-color: var(--border-hover);
+  color: var(--text-2);
+}
+.chip.active {
+  border-color: var(--accent-border);
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+/* ---- playground ---- */
+.playground {
+  padding: 64px 0;
+  border-top: 1px solid var(--border);
+}
+
+.playground-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.playground-stage {
+  padding: 40px 32px;
+  min-height: 80px;
+  display: flex;
+  align-items: center;
+}
+
+.playground-stage .morph-display {
+  font-family: var(--sans);
+  font-size: clamp(22px, 4vw, 32px);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+  color: var(--text);
+  position: relative;
+  overflow: hidden;
+}
+
+.playground-controls {
+  padding: 16px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: var(--bg-raised);
+}
+
+.input-row {
+  display: flex;
+  gap: 8px;
+}
+
+.text-input {
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 500;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  outline: none;
+  flex: 1;
+  min-width: 0;
+  transition: border-color 0.15s;
+}
+.text-input:focus { border-color: var(--accent); }
+.text-input::placeholder { color: var(--text-3); }
+
+.morph-btn {
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  background: var(--accent);
+  color: white;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  white-space: nowrap;
+}
+.morph-btn:hover { opacity: 0.85; }
+
+.settings-row {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.setting {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.setting label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-3);
+  white-space: nowrap;
+}
+.setting input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 80px;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  outline: none;
+}
+.setting input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--text);
+  cursor: pointer;
+  border: 2px solid var(--bg);
+  box-shadow: 0 0 0 1px var(--border-hover);
+}
+.setting .val {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-3);
+  min-width: 36px;
+}
+
+/* ---- code ---- */
+.code-section {
+  padding: 64px 0;
+  border-top: 1px solid var(--border);
+}
+
+.section-title {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 8px;
+}
+
+.section-desc {
+  font-size: 15px;
+  color: var(--text-2);
+  margin-bottom: 24px;
+  line-height: 1.6;
+}
+
+.code-block {
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  overflow-x: auto;
+  margin-bottom: 16px;
+  position: relative;
+}
+
+.code-block code {
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--text-2);
+  white-space: pre;
+}
+
+.code-label {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: var(--bg-card);
+}
+
+/* syntax */
+.hl-kw { color: #c4b5fd; }
+.hl-str { color: #86efac; }
+.hl-fn { color: #fbbf24; }
+.hl-num { color: #fb923c; }
+.hl-cmt { color: #52525b; font-style: italic; }
+.hl-tag { color: #60a5fa; }
+.hl-attr { color: #c4b5fd; }
+.hl-comp { color: #60a5fa; }
+.hl-type { color: #fb923c; }
+.hl-prop { color: #e4e4e7; }
+.hl-brace { color: #52525b; }
+.hl-punc { color: #71717a; }
+
+/* ---- props table ---- */
+.props-section {
+  padding: 64px 0;
+  border-top: 1px solid var(--border);
+}
+
+.props-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.props-table th {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.props-table td {
+  padding: 12px;
+  color: var(--text-2);
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  font-size: 13px;
+}
+
+.props-table td:first-child {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--accent);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.props-table td:nth-child(2),
+.props-table td:nth-child(3) {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text-3);
+}
+
+/* ---- how it works ---- */
+.how-section {
+  padding: 64px 0;
+  border-top: 1px solid var(--border);
+}
+
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.step {
+  display: flex;
+  gap: 16px;
+  padding: 16px 0;
+}
+
+.step-num {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-3);
+  min-width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg-raised);
+  flex-shrink: 0;
+}
+
+.step-text {
+  font-size: 14px;
+  color: var(--text-2);
+  line-height: 1.7;
+  padding-top: 3px;
+}
+.step-text strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* ---- footer ---- */
+footer {
+  padding: 32px 0 64px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+footer p {
+  font-size: 13px;
+  color: var(--text-3);
+}
+footer a {
+  color: var(--text-2);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+footer a:hover { color: var(--text); }
+
+/* ---- responsive ---- */
+@media (max-width: 600px) {
+  .hero { padding-top: 96px; }
+  .demo-stage { padding: 32px 20px; }
+  .playground-stage { padding: 32px 20px; }
+  .input-row { flex-direction: column; }
+  .settings-row { flex-direction: column; gap: 12px; }
+  .hero-meta { flex-wrap: wrap; gap: 12px; }
+  .step { gap: 12px; }
+}
+
+/* ---- entrance ---- */
+.fade-up {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.5s var(--ease), transform 0.5s var(--ease);
+}
+.fade-up.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <div class="logo"><span>morph-text</span>-native</div>
+    <div class="links">
+      <a href="#demo">Demo</a>
+      <a href="#playground">Playground</a>
+      <a href="#usage">Usage</a>
+      <a href="#api">API</a>
+      <a href="https://github.com/detail-co/morph-text-native" class="gh-link" target="_blank">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+      </a>
+    </div>
+  </div>
+</nav>
+
+<div class="page">
+
+  <!-- hero -->
+  <section class="hero">
+    <div class="hero-label fade-up">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      React Native
+    </div>
+    <h1 class="fade-up" style="transition-delay: 0.05s">Smooth text morphing<br>for React Native</h1>
+    <p class="hero-desc fade-up" style="transition-delay: 0.1s">
+      Character-level FLIP animations powered by Reanimated. Each character finds its way to the right place.
+    </p>
+    <div class="hero-actions fade-up" style="transition-delay: 0.15s">
+      <a href="#usage" class="btn-primary">Get started</a>
+      <button class="btn-secondary" id="copyBtn" onclick="copyInstall()">
+        <code>npm i morph-text-native</code>
+        <svg class="copy-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+      </button>
+    </div>
+    <div class="hero-meta fade-up" style="transition-delay: 0.2s">
+      <span class="meta-item"><span class="meta-dot"></span> MIT License</span>
+      <span class="meta-item">Reanimated 3+</span>
+      <span class="meta-item">~3KB</span>
+    </div>
+  </section>
+
+  <!-- demo -->
+  <section class="demo fade-up" id="demo" style="transition-delay: 0.1s">
+    <div class="section-label">Live Demo</div>
+    <div class="demo-card">
+      <div class="demo-stage">
+        <div class="toast-pill" id="toastPill">
+          <div class="toast-icon" id="toastIcon" data-state="loading">
+            <!-- spinner -->
+            <div class="icon-spinner">
+              <svg viewBox="0 0 20 20" fill="none">
+                <circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="2" opacity="0.2"/>
+                <path d="M10 2a8 8 0 0 1 8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <!-- check -->
+            <div class="icon-check">
+              <svg viewBox="0 0 20 20" fill="none">
+                <path d="M4 10.5l4 4 8-9" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <!-- error -->
+            <div class="icon-error">
+              <svg viewBox="0 0 20 20" fill="none">
+                <path d="M5 5l10 10M15 5L5 15" stroke="#f87171" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </div>
+          </div>
+          <div class="toast-morph" id="toastMorph" data-state="loading"></div>
+        </div>
+      </div>
+      <div class="demo-toolbar" id="demoControls"></div>
+    </div>
+  </section>
+
+  <!-- playground -->
+  <section class="playground fade-up" id="playground">
+    <div class="section-label">Playground</div>
+    <div class="playground-card">
+      <div class="playground-stage">
+        <div class="morph-display" id="morphPlayground"></div>
+      </div>
+      <div class="playground-controls">
+        <div class="input-row">
+          <input
+            class="text-input"
+            id="playgroundInput"
+            type="text"
+            placeholder="Type something..."
+            value="Hello world"
+            autocomplete="off"
+            spellcheck="false"
+          >
+          <button class="morph-btn" id="playgroundBtn">Morph</button>
+        </div>
+        <div class="settings-row">
+          <div class="setting">
+            <label>Duration</label>
+            <input type="range" id="durationSlider" min="100" max="1200" value="400" step="50">
+            <span class="val" id="durationVal">400ms</span>
+          </div>
+          <div class="setting">
+            <label>Scale</label>
+            <input type="range" id="scaleSlider" min="0" max="1" value="1" step="1">
+            <span class="val" id="scaleVal">on</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- code -->
+  <section class="code-section fade-up" id="usage">
+    <div class="section-title">Get started</div>
+    <div class="section-desc">Drop in alongside your existing Reanimated setup.</div>
+
+    <div class="code-block">
+      <span class="code-label">Install</span>
+      <code>npm install morph-text-native</code>
+    </div>
+
+    <div class="code-block">
+      <span class="code-label">Basic</span>
+      <code><span class="hl-kw">import</span> { <span class="hl-comp">MorphText</span> } <span class="hl-kw">from</span> <span class="hl-str">'morph-text-native'</span><span class="hl-punc">;</span>
+
+<span class="hl-kw">function</span> <span class="hl-fn">StatusLabel</span><span class="hl-punc">(</span>{ text }<span class="hl-punc">)</span> {
+  <span class="hl-kw">return</span> <span class="hl-punc">(</span>
+    <span class="hl-punc">&lt;</span><span class="hl-comp">MorphText</span>
+      <span class="hl-attr">style</span><span class="hl-punc">={{</span> <span class="hl-prop">fontSize</span><span class="hl-punc">:</span> <span class="hl-num">16</span><span class="hl-punc">,</span> <span class="hl-prop">fontWeight</span><span class="hl-punc">:</span> <span class="hl-str">'600'</span> <span class="hl-punc">}}</span>
+      <span class="hl-attr">duration</span><span class="hl-punc">={</span><span class="hl-num">400</span><span class="hl-punc">}</span>
+    <span class="hl-punc">&gt;</span>
+      {text}
+    <span class="hl-punc">&lt;/</span><span class="hl-comp">MorphText</span><span class="hl-punc">&gt;</span>
+  <span class="hl-punc">)</span><span class="hl-punc">;</span>
+}</code>
+    </div>
+
+    <div class="code-block">
+      <span class="code-label">Toast</span>
+      <code><span class="hl-cmt">// Text morphs between messages instead of stacking toasts</span>
+<span class="hl-punc">&lt;</span><span class="hl-comp">Animated.View</span> <span class="hl-attr">entering</span><span class="hl-punc">={</span><span class="hl-fn">SlideInDown</span><span class="hl-punc">.</span><span class="hl-fn">duration</span><span class="hl-punc">(</span><span class="hl-num">300</span><span class="hl-punc">)}&gt;</span>
+  <span class="hl-punc">&lt;</span><span class="hl-comp">AnimatedIcon</span> <span class="hl-attr">type</span><span class="hl-punc">={</span>type<span class="hl-punc">}</span> <span class="hl-punc">/&gt;</span>
+  <span class="hl-punc">&lt;</span><span class="hl-comp">MorphText</span>
+    <span class="hl-attr">style</span><span class="hl-punc">={{</span> <span class="hl-prop">fontSize</span><span class="hl-punc">:</span> <span class="hl-num">16</span><span class="hl-punc">,</span> <span class="hl-prop">color</span><span class="hl-punc">:</span> theme<span class="hl-punc">.</span><span class="hl-prop">text</span> <span class="hl-punc">}}</span>
+    <span class="hl-attr">duration</span><span class="hl-punc">={</span><span class="hl-num">300</span><span class="hl-punc">}</span>
+  <span class="hl-punc">&gt;</span>
+    {message}
+  <span class="hl-punc">&lt;/</span><span class="hl-comp">MorphText</span><span class="hl-punc">&gt;</span>
+<span class="hl-punc">&lt;/</span><span class="hl-comp">Animated.View</span><span class="hl-punc">&gt;</span></code>
+    </div>
+  </section>
+
+  <!-- how it works -->
+  <section class="how-section fade-up">
+    <div class="section-title">How it works</div>
+    <div class="section-desc">The same FLIP algorithm behind <a href="https://torph.lochie.me/" target="_blank" style="color: var(--accent); text-decoration: none;">torph</a>, adapted for React Native.</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-text"><strong>Segment</strong> — text is split into characters, each assigned a stable ID. First <code>a</code> gets id <code>"a"</code>, second gets <code>"a-5"</code>.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-text"><strong>Diff</strong> — old and new character sets are compared by ID to find persisting, entering, and exiting characters.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-text"><strong>FLIP</strong> — persisting characters animate from their old position to their new position using transforms.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-text"><strong>Enter/Exit</strong> — new characters fade in from a neighbor's old position. Removed characters fade out fast at their last known position.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- props -->
+  <section class="props-section fade-up" id="api">
+    <div class="section-title">API</div>
+    <div class="section-desc">All props are optional except <code style="font-family: var(--mono); font-size: 13px; color: var(--accent);">children</code>.</div>
+    <table class="props-table">
+      <thead>
+        <tr>
+          <th>Prop</th>
+          <th>Type</th>
+          <th>Default</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>children</td>
+          <td>string</td>
+          <td>&mdash;</td>
+          <td>Text to display and morph between</td>
+        </tr>
+        <tr>
+          <td>style</td>
+          <td>TextStyle</td>
+          <td>&mdash;</td>
+          <td>Style for each character</td>
+        </tr>
+        <tr>
+          <td>containerStyle</td>
+          <td>ViewStyle</td>
+          <td>&mdash;</td>
+          <td>Style for the outer container</td>
+        </tr>
+        <tr>
+          <td>duration</td>
+          <td>number</td>
+          <td>400</td>
+          <td>Animation duration in ms</td>
+        </tr>
+        <tr>
+          <td>ease</td>
+          <td>EasingFunction</td>
+          <td>bezier(0.19, 1, 0.22, 1)</td>
+          <td>Reanimated easing function</td>
+        </tr>
+        <tr>
+          <td>scale</td>
+          <td>boolean</td>
+          <td>true</td>
+          <td>Scale entering characters from 0.95</td>
+        </tr>
+        <tr>
+          <td>onAnimationStart</td>
+          <td>() =&gt; void</td>
+          <td>&mdash;</td>
+          <td>Fires when animation starts</td>
+        </tr>
+        <tr>
+          <td>onAnimationComplete</td>
+          <td>() =&gt; void</td>
+          <td>&mdash;</td>
+          <td>Fires when animation ends</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <footer>
+    <p><a href="https://github.com/detail-co/morph-text-native">morph-text-native</a> &middot; MIT</p>
+    <p>Built by <a href="https://detail.co">Detail</a></p>
+  </footer>
+
+</div>
+
+<script>
+// ========================================
+// Morph engine (torph-faithful)
+// ========================================
+
+class MorphEngine {
+  constructor(container, opts = {}) {
+    this.container = container;
+    this.duration = opts.duration || 400;
+    this.ease = opts.ease || 'cubic-bezier(0.19, 1, 0.22, 1)';
+    this.scaleEnabled = opts.scale !== false;
+    this.isInitial = true;
+    this._elements = [];
+    this._rawChars = [];
+
+    this.container.style.display = 'inline-flex';
+    this.container.style.position = 'relative';
+    this.container.style.willChange = 'width, height';
+    this.container.style.transitionProperty = 'width, height';
+    this.container.style.transitionDuration = this.duration + 'ms';
+    this.container.style.transitionTimingFunction = this.ease;
+  }
+
+  // Weighted LCS: spaces score 2 so they're preferred over cross-word char matches
+  _lcs(a, b) {
+    const m = a.length, n = b.length;
+    const dp = [];
+    for (let i = 0; i <= m; i++) dp[i] = new Float64Array(n + 1);
+    for (let i = 1; i <= m; i++) {
+      for (let j = 1; j <= n; j++) {
+        if (a[i-1] === b[j-1]) {
+          dp[i][j] = dp[i-1][j-1] + (a[i-1] === ' ' ? 2 : 1);
+        } else {
+          dp[i][j] = Math.max(dp[i-1][j], dp[i][j-1]);
+        }
+      }
+    }
+    const result = [];
+    let i = m, j = n;
+    while (i > 0 && j > 0) {
+      if (a[i-1] === b[j-1]) { result.push([i-1, j-1]); i--; j--; }
+      else if (dp[i-1][j] >= dp[i][j-1]) i--;
+      else j--;
+    }
+    return result.reverse();
+  }
+
+  setText(newText) {
+    if (newText === this._text) return;
+    this._text = newText;
+    const newRaw = Array.from(newText);
+    const oldWidth = this.container.offsetWidth;
+    const oldHeight = this.container.offsetHeight;
+
+    if (!this.isInitial && oldWidth > 0) {
+      this.container.style.width = oldWidth + 'px';
+      this.container.style.height = oldHeight + 'px';
+    }
+
+    // Measure old positions
+    const oldPos = this._elements.map(el => ({ x: el.offsetLeft, y: el.offsetTop }));
+
+    // LCS match
+    const matches = this._lcs(this._rawChars, newRaw);
+    const matchedOld = new Set(matches.map(m => m[0]));
+    const matchedNew = new Set(matches.map(m => m[1]));
+    const oldToNew = new Map(matches.map(m => [m[0], m[1]]));
+    const newToOld = new Map(matches.map(m => [m[1], m[0]]));
+
+    // Identify exiting elements and their anchors
+    const exitingData = [];
+    for (let i = 0; i < this._elements.length; i++) {
+      if (matchedOld.has(i)) continue;
+      let anchorIdx = null;
+      for (let j = i + 1; j < this._elements.length; j++) {
+        if (matchedOld.has(j)) { anchorIdx = j; break; }
+      }
+      if (anchorIdx === null) {
+        for (let j = i - 1; j >= 0; j--) {
+          if (matchedOld.has(j)) { anchorIdx = j; break; }
+        }
+      }
+      exitingData.push({ el: this._elements[i], anchorIdx });
+    }
+
+    // Position exiting elements absolutely
+    const parentRect = this.container.getBoundingClientRect();
+    exitingData.forEach(({ el }) => {
+      const rect = el.getBoundingClientRect();
+      el.setAttribute('data-exiting', '');
+      el.style.position = 'absolute';
+      el.style.pointerEvents = 'none';
+      el.style.left = (rect.left - parentRect.left) + 'px';
+      el.style.top = (rect.top - parentRect.top) + 'px';
+      el.style.width = rect.width + 'px';
+      el.style.height = rect.height + 'px';
+    });
+
+    // Remove persisting old elements from DOM (will be recreated)
+    for (let i = 0; i < this._elements.length; i++) {
+      if (matchedOld.has(i)) this._elements[i].remove();
+    }
+
+    // Create new spans
+    const newEls = newRaw.map(ch => {
+      const span = document.createElement('span');
+      span.className = 'morph-char';
+      span.style.display = 'inline-block';
+      span.style.willChange = 'opacity, transform';
+      span.style.whiteSpace = 'pre';
+      span.textContent = ch === ' ' ? '\u00A0' : ch;
+      this.container.appendChild(span);
+      return span;
+    });
+
+    // Measure new positions
+    const newPos = newEls.map(el => ({ x: el.offsetLeft, y: el.offsetTop }));
+
+    if (!this.isInitial) {
+      // Animate persisting (FLIP)
+      for (const [oi, ni] of matches) {
+        const dx = oldPos[oi].x - newPos[ni].x;
+        const dy = oldPos[oi].y - newPos[ni].y;
+        if (dx === 0 && dy === 0) continue;
+        newEls[ni].animate(
+          { transform: `translate(${dx}px,${dy}px)`, offset: 0 },
+          { duration: this.duration, easing: this.ease, fill: 'both' }
+        );
+      }
+
+      // Animate entering
+      for (let i = 0; i < newRaw.length; i++) {
+        if (matchedNew.has(i)) continue;
+        let anchorNew = null;
+        for (let j = i - 1; j >= 0; j--) {
+          if (matchedNew.has(j)) { anchorNew = j; break; }
+        }
+        if (anchorNew === null) {
+          for (let j = i + 1; j < newRaw.length; j++) {
+            if (matchedNew.has(j)) { anchorNew = j; break; }
+          }
+        }
+        let dx = 0, dy = 0;
+        if (anchorNew !== null) {
+          const anchorOld = newToOld.get(anchorNew);
+          dx = oldPos[anchorOld].x - newPos[anchorNew].x;
+          dy = oldPos[anchorOld].y - newPos[anchorNew].y;
+        }
+        newEls[i].animate(
+          { transform: `translate(${dx}px,${dy}px) scale(${this.scaleEnabled ? 0.95 : 1})`, offset: 0 },
+          { duration: this.duration, easing: this.ease, fill: 'both' }
+        );
+        newEls[i].animate(
+          { opacity: 0, offset: 0 },
+          { duration: this.duration * 0.25, delay: this.duration * 0.25, easing: 'linear', fill: 'both' }
+        );
+      }
+
+      // Animate exiting
+      exitingData.forEach(({ el, anchorIdx }) => {
+        let dx = 0, dy = 0;
+        if (anchorIdx !== null && oldToNew.has(anchorIdx)) {
+          const ni = oldToNew.get(anchorIdx);
+          dx = newPos[ni].x - oldPos[anchorIdx].x;
+          dy = newPos[ni].y - oldPos[anchorIdx].y;
+        }
+        el.getAnimations().forEach(a => a.cancel());
+        el.animate({
+          transform: this.scaleEnabled
+            ? `translate(${dx}px,${dy}px) scale(0.95)`
+            : `translate(${dx}px,${dy}px)`,
+          offset: 1,
+        }, { duration: this.duration, easing: this.ease, fill: 'both' });
+        const fade = el.animate(
+          { opacity: 0, offset: 1 },
+          { duration: this.duration * 0.25, easing: 'linear', fill: 'both' }
+        );
+        fade.onfinish = () => el.remove();
+      });
+    } else {
+      exitingData.forEach(({ el }) => el.remove());
+    }
+
+    // Container size animation
+    if (!this.isInitial && oldWidth > 0 && oldHeight > 0) {
+      this.container.style.width = 'auto';
+      this.container.style.height = 'auto';
+      void this.container.offsetWidth;
+      const nw = this.container.offsetWidth;
+      const nh = this.container.offsetHeight;
+      this.container.style.transition = 'none';
+      this.container.style.width = oldWidth + 'px';
+      this.container.style.height = oldHeight + 'px';
+      void this.container.offsetWidth;
+      this.container.style.transition = '';
+      this.container.style.width = nw + 'px';
+      this.container.style.height = nh + 'px';
+      setTimeout(() => {
+        this.container.style.width = 'auto';
+        this.container.style.height = 'auto';
+      }, this.duration);
+    } else {
+      this.container.style.width = 'auto';
+      this.container.style.height = 'auto';
+    }
+
+    this._elements = newEls;
+    this._rawChars = newRaw;
+    if (this.isInitial) this.isInitial = false;
+  }
+
+  setDuration(d) {
+    this.duration = d;
+    this.container.style.transitionDuration = d + 'ms';
+  }
+  setScale(s) { this.scaleEnabled = s; }
+}
+
+// ========================================
+// Toast demo
+// ========================================
+
+const sequences = [
+  { loading: 'Publishing post...', result: 'Post published!', type: 'success' },
+  { loading: 'Saving changes...', result: 'Changes saved', type: 'success' },
+  { loading: 'Uploading media...', result: 'Upload failed', type: 'error' },
+  { loading: 'Sending message...', result: 'Message sent', type: 'success' },
+];
+
+const toastMorphEl = document.getElementById('toastMorph');
+const toastIconEl = document.getElementById('toastIcon');
+const toastEngine = new MorphEngine(toastMorphEl);
+const controlsEl = document.getElementById('demoControls');
+
+function setToastState(text, state) {
+  toastEngine.setText(text);
+  toastIconEl.setAttribute('data-state', state);
+  toastMorphEl.setAttribute('data-state', state);
+}
+
+// Init
+setToastState(sequences[0].loading, 'loading');
+
+// Buttons
+sequences.forEach((seq, i) => {
+  const btn = document.createElement('button');
+  btn.className = 'chip' + (i === 0 ? ' active' : '');
+  btn.textContent = seq.loading.replace('...', '');
+  btn.addEventListener('click', () => {
+    playSequence(i);
+    controlsEl.querySelectorAll('.chip').forEach((b, bi) => b.classList.toggle('active', bi === i));
+    pauseAutoCycle();
+  });
+  controlsEl.appendChild(btn);
+});
+
+let seqTimeout = null;
+function playSequence(idx) {
+  clearTimeout(seqTimeout);
+  const seq = sequences[idx];
+  setToastState(seq.loading, 'loading');
+  seqTimeout = setTimeout(() => {
+    setToastState(seq.result, seq.type);
+  }, 1800);
+}
+
+// Auto-cycle
+let seqIdx = 0;
+let cycleTimer = null;
+let resumeTimer = null;
+
+function autoCycleTick() {
+  playSequence(seqIdx);
+  controlsEl.querySelectorAll('.chip').forEach((b, bi) => b.classList.toggle('active', bi === seqIdx));
+  cycleTimer = setTimeout(() => {
+    seqIdx = (seqIdx + 1) % sequences.length;
+    autoCycleTick();
+  }, 3600);
+}
+
+function pauseAutoCycle() {
+  clearTimeout(cycleTimer);
+  clearTimeout(resumeTimer);
+  resumeTimer = setTimeout(() => {
+    seqIdx = 0;
+    autoCycleTick();
+  }, 8000);
+}
+
+autoCycleTick();
+
+// ========================================
+// Playground
+// ========================================
+
+const playEl = document.getElementById('morphPlayground');
+const playEngine = new MorphEngine(playEl);
+playEngine.setText('Hello world');
+
+const playInput = document.getElementById('playgroundInput');
+const playBtn = document.getElementById('playgroundBtn');
+
+function morphPlayground() {
+  playEngine.setText(playInput.value || ' ');
+}
+
+playBtn.addEventListener('click', morphPlayground);
+playInput.addEventListener('keydown', e => { if (e.key === 'Enter') morphPlayground(); });
+
+const durSlider = document.getElementById('durationSlider');
+const durVal = document.getElementById('durationVal');
+durSlider.addEventListener('input', () => {
+  const v = parseInt(durSlider.value);
+  durVal.textContent = v + 'ms';
+  toastEngine.setDuration(v);
+  playEngine.setDuration(v);
+});
+
+const scaleSlider = document.getElementById('scaleSlider');
+const scaleValEl = document.getElementById('scaleVal');
+scaleSlider.addEventListener('input', () => {
+  const v = parseInt(scaleSlider.value);
+  scaleValEl.textContent = v ? 'on' : 'off';
+  toastEngine.setScale(!!v);
+  playEngine.setScale(!!v);
+});
+
+// ========================================
+// Copy
+// ========================================
+
+function copyInstall() {
+  navigator.clipboard.writeText('npm install morph-text-native').then(() => {
+    const btn = document.getElementById('copyBtn');
+    const code = btn.querySelector('code');
+    const orig = code.textContent;
+    code.textContent = 'Copied!';
+    setTimeout(() => { code.textContent = orig; }, 1500);
+  });
+}
+
+// ========================================
+// Fade-up observer
+// ========================================
+
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) entry.target.classList.add('visible');
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -30px 0px' });
+
+document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
