@@ -1,6 +1,6 @@
 {
-  "name": "morph-text-native",
-  "version": "0.1.0",
+  "name": "@detail-co/morph-text-native",
+  "version": "0.1.1",
   "description": "Smooth text morphing animations for React Native using reanimated",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
